@@ -1,13 +1,22 @@
 @file:Suppress("DEPRECATION")
 
+import kotlinx.coroutines.*
+
+
 const val BASE_URL = "http://kotlin-book.bignerdranch.com/2e"
 const val FLIGHT_ENDPOINT = "$BASE_URL/flight"
 
 fun main() {
-    println("Started")
-    val flight = fetchFlight()
-    println(flight)
-    println("Finished")
+    runBlocking {
+        println("Started")
+        launch {
+            val flight = fetchFlight()
+            println(flight)
+        }
+        println("Finished")
+    }
 }
 
-fun fetchFlight(): String = java.net.URL(FLIGHT_ENDPOINT).readText()
+suspend fun fetchFlight(): String = withContext(Dispatchers.IO) {
+    java.net.URL(FLIGHT_ENDPOINT).readText()
+}
