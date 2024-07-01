@@ -1,5 +1,7 @@
-@file:Suppress("DEPRECATION")
-
+import io.ktor.client.HttpClient
+import io.ktor.client.engine.cio.CIO
+import io.ktor.client.request.get
+import io.ktor.client.statement.bodyAsText
 import java.net.URL
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.launch
@@ -20,6 +22,7 @@ fun main() {
     }
 }
 
-suspend fun fetchFlight(): String = withContext(Dispatchers.IO) {
-    URL(FLIGHT_ENDPOINT).readText()
+suspend fun fetchFlight(): String {
+    val client = HttpClient(CIO)
+    return client.get(FLIGHT_ENDPOINT, ).bodyAsText()
 }
