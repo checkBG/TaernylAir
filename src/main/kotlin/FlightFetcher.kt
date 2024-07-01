@@ -22,9 +22,18 @@ fun main() {
 
 suspend fun fetchFlight(passengerName: String): FlightStatus {
     val client = HttpClient(CIO)
-    val flightResponse = client.get(FLIGHT_ENDPOINT).bodyAsText()
-    val loyaltyResponse = client.get(LOYALTY_ENDPOINT).bodyAsText()
 
+    println("Started fetching flight info")
+    val flightResponse = client.get(FLIGHT_ENDPOINT).bodyAsText().also {
+        println("Finished fetching flight info")
+    }
+
+    println("Started fetching loyalty info")
+    val loyaltyResponse = client.get(LOYALTY_ENDPOINT).bodyAsText().also {
+        println("Finished fetching loyalty info")
+    }
+
+    println("Combining flight data")
     return FlightStatus.parse(
         flightResponse = flightResponse,
         loyaltyResponse = loyaltyResponse,
