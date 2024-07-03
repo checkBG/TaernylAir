@@ -1,6 +1,20 @@
+buildscript {
+//    repositories {
+//        maven {
+//            url = uri("https://plugins.gradle.org/m2/")
+//        }
+//    }
+
+    dependencies {
+        classpath("org.jetbrains.kotlinx:atomicfu-gradle-plugin:0.16.2")
+    }
+}
+
 plugins {
     kotlin("jvm") version "2.0.0"
 }
+
+apply(plugin = "kotlinx-atomicfu")
 
 group = "org.example"
 version = "1.0-SNAPSHOT"
