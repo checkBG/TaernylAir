@@ -1,10 +1,13 @@
 package com.learn.coroutines
 
-import io.ktor.client.HttpClient
-import io.ktor.client.engine.cio.CIO
-import io.ktor.client.request.get
-import io.ktor.client.statement.bodyAsText
-import kotlinx.coroutines.*
+import io.ktor.client.*
+import io.ktor.client.engine.cio.*
+import io.ktor.client.request.*
+import io.ktor.client.statement.*
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 
 private const val BASE_URL = "http://kotlin-book.bignerdranch.com/2e"
 private const val FLIGHT_ENDPOINT = "$BASE_URL/flight"
@@ -25,10 +28,16 @@ suspend fun fetchFlight(passengerName: String): FlightStatus = coroutineScope {
     val client = HttpClient(CIO)
 
     val flightResponse = async {
-        println("Started fetching flight info")
-        client.get(FLIGHT_ENDPOINT).bodyAsText().also {
-            println("Finished fetching flight info")
-        }
+        var data: String
+
+        do {
+            println("Started fetching flight info")
+            data = client.get(FLIGHT_ENDPOINT).bodyAsText().also {
+                println("Finished fetching flight info")
+            }
+        } while (data.contains("canceled", ignoreCase = true))
+//        } while (data.split(",")[3].equals("canceled", ignoreCase = true))
+        data
     }
 
     val loyaltyResponse = async {
