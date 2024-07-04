@@ -1,3 +1,5 @@
+package com.learn.coroutines
+
 data class FlightStatus(
     val flightNumber: String,
     val passengerName: String,

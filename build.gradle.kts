@@ -1,26 +1,20 @@
-buildscript {
-//    repositories {
-//        maven {
-//            url = uri("https://plugins.gradle.org/m2/")
-//        }
-//    }
-
-    dependencies {
-        classpath("org.jetbrains.kotlinx:atomicfu-gradle-plugin:0.16.2")
-    }
-}
-
 plugins {
     kotlin("jvm") version "2.0.0"
+    id("org.jetbrains.kotlinx.atomicfu") version "0.25.0"
+    application
 }
 
-apply(plugin = "kotlinx-atomicfu")
+application {
+    mainClass = "com.learn.coroutines.RaceKt"
+}
+
 
 group = "org.example"
 version = "1.0-SNAPSHOT"
 
 repositories {
     mavenCentral()
+    maven("https://jitpack.io")
 }
 
 dependencies {
@@ -30,12 +24,14 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:2.3.12")
     implementation("org.slf4j:slf4j-api:1.6.1")
     implementation("org.slf4j:slf4j-simple:1.6.1")
+    implementation("org.jetbrains.kotlinx:atomicfu:0.16.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 
 tasks.test {
     useJUnitPlatform()
 }
+
 kotlin {
-    jvmToolchain(20)
+    jvmToolchain(21)
 }
