@@ -4,10 +4,7 @@ import io.ktor.client.*
 import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
-import kotlinx.coroutines.async
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.*
 
 private const val BASE_URL = "http://kotlin-book.bignerdranch.com/2e"
 private const val FLIGHT_ENDPOINT = "$BASE_URL/flight"
