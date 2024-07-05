@@ -3,12 +3,33 @@ package com.learn.coroutines
 data class FlightStatus(
     val flightNumber: String,
     val passengerName: String,
-    val passengerLoyaltyTier: String,
+    val passengerLoyaltyTier: LoyaltyTier,
     val originAirport: String,
     val destinationAirport: String,
     val status: String,
     val departureTimeInMinutes: Int
 ) {
+    val isFlightCanceled: Boolean
+        get() = status.equals("canceled", ignoreCase = true)
+
+    val hasBoardingStarted: Boolean
+        get() = departureTimeInMinutes in 15..60
+
+    val isBoardingOver: Boolean
+        get() = departureTimeInMinutes < 15
+
+    val isEligibleToBoard: Boolean
+        get() = departureTimeInMinutes in 15..passengerLoyaltyTier.boardingWindowStart
+
+    val boardingStatus: BoardingState
+        get() = when {
+            isFlightCanceled -> BoardingState.FlightCanceled
+            isBoardingOver -> BoardingState.BoardingEnded
+            isEligibleToBoard -> BoardingState.Boarding
+            hasBoardingStarted -> BoardingState.WaitingToBoard
+            else -> BoardingState.BoardingNotStarted
+        }
+
     companion object {
         fun parse(
             flightResponse: String,
@@ -24,7 +45,7 @@ data class FlightStatus(
             return FlightStatus(
                 flightNumber = flightNumber,
                 passengerName = passengerName,
-                passengerLoyaltyTier = loyaltyTierName,
+                passengerLoyaltyTier = LoyaltyTier.entries.first { it.tierName == loyaltyTierName },
                 originAirport = originAirport,
                 destinationAirport = destinationAirport,
                 status = status,
@@ -50,26 +71,8 @@ enum class LoyaltyTier(
 
 enum class BoardingState {
     FlightCanceled,
-    BoardingNotStarting,
+    BoardingNotStarted,
     WaitingToBoard,
     Boarding,
     BoardingEnded
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

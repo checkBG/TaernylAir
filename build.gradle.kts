@@ -24,7 +24,6 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:2.3.12")
     implementation("org.slf4j:slf4j-api:1.6.1")
     implementation("org.slf4j:slf4j-simple:1.6.1")
-    implementation("org.jetbrains.kotlinx:atomicfu:0.16.2")
     testImplementation("org.jetbrains.kotlin:kotlin-test")
 }
 
