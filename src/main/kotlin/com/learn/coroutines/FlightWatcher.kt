@@ -27,6 +27,7 @@ suspend fun watchFlight(initialFlight: FlightStatus) {
         while (flight.departureTimeInMinutes >= 0 && !flight.isFlightCanceled) {
             emit(flight)
             delay(1000)
+            emit(flight)
             flight = flight.copy(
                 departureTimeInMinutes = flight.departureTimeInMinutes - 1
             )

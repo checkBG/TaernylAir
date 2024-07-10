@@ -5,6 +5,7 @@ plugins {
 }
 
 application {
+//    mainClass = "com.learn.coroutines.FlightWatcherKt"
     mainClass = "com.learn.coroutines.FlightWatcherKt"
 }
 
