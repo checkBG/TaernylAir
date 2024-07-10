@@ -2,9 +2,7 @@ package com.learn.coroutines
 
 import com.learn.coroutines.BoardingState.*
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 
@@ -22,15 +20,19 @@ fun main() {
         val flightsAtGate = MutableStateFlow(value = flights.size)
 
         launch {
-            flightsAtGate.collect { flightCount ->
-                println("There are $flightCount flights being tracked")
-            }
+            flightsAtGate
+                .takeWhile { it > 0 }
+//                .dropWhile { it <= 0 }
+                .collect { flightCount ->
+                    println("There are $flightCount flights being tracked")
+                }
+            println("Finished tracking all flights")
         }
 
         launch {
             flights.forEach {
                 watchFlight(it)
-//                flightsAtGate.value--
+                flightsAtGate.value--
             }
         }
     }
