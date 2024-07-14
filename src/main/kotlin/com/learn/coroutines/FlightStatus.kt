@@ -36,9 +36,7 @@ data class FlightStatus(
             loyaltyResponse: String,
             passengerName: String
         ): FlightStatus {
-            val (flightNumber, originAirport, destinationAirport, status, departureTimeInMinutes) = flightResponse.split(
-                ","
-            )
+            val (flightNumber, originAirport, destinationAirport, status, departureTimeInMinutes) = flightResponse.split(",")
 
             val (loyaltyTierName, milesFlown, milesToNextTier) = loyaltyResponse.split(",")
 

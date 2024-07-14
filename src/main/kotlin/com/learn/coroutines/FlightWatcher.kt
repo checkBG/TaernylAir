@@ -1,10 +1,14 @@
 package com.learn.coroutines
 
 import com.learn.coroutines.BoardingState.*
-import kotlinx.coroutines.delay
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.channels.ReceiveChannel
+import kotlinx.coroutines.channels.SendChannel
+import kotlinx.coroutines.channels.toList
 import kotlinx.coroutines.flow.*
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
+
+val bannedPassengers = setOf("Nogartse")
 
 fun main() {
     runBlocking {
@@ -22,11 +26,12 @@ fun main() {
         launch {
             flightsAtGate
                 .takeWhile { it > 0 }
-//                .dropWhile { it <= 0 }
+                .onCompletion {
+                    println("Finished tracking all flights")
+                }
                 .collect { flightCount ->
                     println("There are $flightCount flights being tracked")
                 }
-            println("Finished tracking all flights")
         }
 
         launch {
@@ -42,6 +47,10 @@ suspend fun watchFlight(initialFlight: FlightStatus) {
     val passengerName = initialFlight.passengerName
 
     val currentFlight: Flow<FlightStatus> = flow {
+        require(passengerName !in bannedPassengers) {
+            "Cannot track $passengerName's flight. They are banned from the airport"
+        }
+
         var flight = initialFlight
 
         while (flight.departureTimeInMinutes >= 0 && !flight.isFlightCanceled) {
@@ -53,21 +62,58 @@ suspend fun watchFlight(initialFlight: FlightStatus) {
         }
     }
 
-    currentFlight.collect {
-        val status = when (it.boardingStatus) {
-            FlightCanceled -> "Your flight was canceled"
-            BoardingNotStarted -> "Boarding will start soon"
-            WaitingToBoard -> "Other passengers are boarding"
-            Boarding -> "You can now board the plane"
-            BoardingEnded -> "The boarding doors have closed"
-        } + " (Flight departs in ${it.departureTimeInMinutes} minutes)"
+    currentFlight
+        .map {
+            when (it.boardingStatus) {
+                FlightCanceled -> "Your flight was canceled"
+                BoardingNotStarted -> "Boarding will start soon"
+                WaitingToBoard -> "Other passengers are boarding"
+                Boarding -> "You can now board the plane"
+                BoardingEnded -> "The boarding doors have closed"
+            } + " (Flight departs in ${it.departureTimeInMinutes} minutes)"
+        }
+        .onCompletion {
+            println("Finished tracking $passengerName's flight")
+        }
+        .collect { status ->
+            println("$passengerName: $status")
+        }
 
-        println("$passengerName: $status")
-    }
-
-    println("Finished tracking $passengerName's flight")
 }
 
 suspend fun fetchFlights(
-    passengerNames: List<String> = listOf("Madrigal", "Polarcubis")
-) = passengerNames.map { fetchFlight(it) }
+    passengerNames: List<String> = listOf("Madrigal", "Polarcubis", "Estragon", "Taernyl"),
+    numberOfWorkers: Int = 2
+): List<FlightStatus> = coroutineScope {
+    val passengerNamesChannel = Channel<String>()
+    val fetchedFlightsChannel = Channel<FlightStatus>()
+
+    launch {
+        passengerNames.forEach {
+            passengerNamesChannel.send(it)
+        }
+        passengerNamesChannel.close()
+    }
+
+    launch {
+        (1..numberOfWorkers).map {
+            launch {
+                fetchFlightsStatuses(passengerNamesChannel, fetchedFlightsChannel)
+            }
+        }.joinAll()
+        fetchedFlightsChannel.close()
+    }
+
+    fetchedFlightsChannel.toList()
+}
+
+suspend fun fetchFlightsStatuses(
+    fetchChannel: ReceiveChannel<String>,
+    resultChannel: SendChannel<FlightStatus>
+) {
+    for (passengerName in fetchChannel) {
+        val flight = fetchFlight(passengerName)
+        println("Fetched flight: $flight")
+        resultChannel.send(flight)
+    }
+}

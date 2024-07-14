@@ -6,6 +6,7 @@ import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 
 private const val BASE_URL = "http://kotlin-book.bignerdranch.com/2e"
 private const val FLIGHT_ENDPOINT = "$BASE_URL/flight"
@@ -38,8 +39,8 @@ suspend fun fetchFlight(passengerName: String): FlightStatus = coroutineScope {
         }
     }
 
-//    delay(500)
 
+    delay(500)
     println("Combining flight data")
     FlightStatus.parse(
         flightResponse = flightResponse.await(),
